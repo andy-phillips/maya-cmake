@@ -1,9 +1,16 @@
+if (NOT DEFINED ENV{MAYA_LOCATION} AND NOT DEFINED MAYA_DEVKIT_LOCATION)
+    message(
+        "Please set the MAYA_LOCATION environment variable to the Maya installation path. "
+        "Alternatively set the CMake variable MAYA_DEVKIT_LOCATION to the Maya devkit path."
+    )
+endif()
+
 find_path(Maya_ROOT_DIR
     "include/maya/MFn.h"
     PATHS
         "${MAYA_LOCATION}"
         "$ENV{MAYA_LOCATION}"
-        "${DEVKIT_LOCATION}"
+        "${MAYA_DEVKIT_LOCATION}"
     NO_CACHE
 )
 

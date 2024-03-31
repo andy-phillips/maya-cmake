@@ -1,4 +1,6 @@
 .build
+*.vscode
 *.code-workspace
 CMakeUserPresets.json
+.clang-format
 .cmake-format.*

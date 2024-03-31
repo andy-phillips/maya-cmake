@@ -22,6 +22,12 @@ target_link_libraries(
         Maya::Maya
 )
 
+target_compile_features(
+    ${LIB_NAME}
+    PRIVATE
+        cxx_std_17
+)
+
 target_compile_definitions(
     ${LIB_NAME}
     PRIVATE

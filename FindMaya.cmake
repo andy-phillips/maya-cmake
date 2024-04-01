@@ -1,6 +1,8 @@
-if (NOT DEFINED ENV{MAYA_LOCATION} AND NOT DEFINED MAYA_DEVKIT_LOCATION)
+if (NOT DEFINED ENV{MAYA_LOCATION}
+    AND NOT DEFINED MAYA_LOCATION
+    AND NOT DEFINED MAYA_DEVKIT_LOCATION)
     message(
-        "Please set the MAYA_LOCATION environment variable to the Maya installation path. "
+        "Please set the MAYA_LOCATION variable to the Maya installation path. "
         "Alternatively set the CMake variable MAYA_DEVKIT_LOCATION to the Maya devkit path."
     )
 endif()
@@ -11,7 +13,8 @@ find_path(Maya_ROOT_DIR
         "${MAYA_LOCATION}"
         "$ENV{MAYA_LOCATION}"
         "${MAYA_DEVKIT_LOCATION}"
-    NO_CACHE
+    PATH_SUFFIXES
+        "devkit"
 )
 
 find_path(Maya_LIBRARY_DIRS
@@ -65,7 +68,8 @@ endif()
 
 find_program(Maya_EXECUTABLE maya
     PATHS
-        "${Maya_ROOT_DIR}"
+        "${MAYA_LOCATION}"
+        "$ENV{MAYA_LOCATION}"
     PATH_SUFFIXES
         bin/
         Maya.app/Contents/bin/

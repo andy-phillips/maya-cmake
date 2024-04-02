@@ -149,33 +149,6 @@ if(Maya_INCLUDE_DIR AND EXISTS "${Maya_INCLUDE_DIR}/maya/MTypes.h")
     maya_extract_version_from_file("${Maya_INCLUDE_DIR}/maya/MTypes.h")
 endif()
 
-function(maya_find_executable)
-    if(APPLE)
-        set(DEFAULT_INSTALL_DIR "/Applications/Autodesk")
-    elseif(UNIX)
-        set(DEFAULT_INSTALL_DIR "/usr/autodesk")
-    elseif(WIN32)
-        set(DEFAULT_INSTALL_DIR "C:\\Program Files\\Autodesk")
-    endif()
-
-    find_program(Maya_EXECUTABLE
-        "maya"
-        PATHS
-            "${MAYA_LOCATION}"
-            "$ENV{MAYA_LOCATION}"
-            "${DEFAULT_INSTALL_DIR}"
-        PATH_SUFFIXES
-            "bin"
-            "maya${Maya_VERSION_MAJOR}/Maya.app/Contents/bin"
-        DOC
-            "Absolute path to Maya executable."
-    )
-
-    set(Maya_EXECUTABLE "${Maya_EXECUTABLE}" PARENT_SCOPE)
-endfunction()
-
-maya_find_executable()
-
 set(Maya_COMPONENTS
     Foundation:Foundation
     Maya:OpenMaya
@@ -217,39 +190,36 @@ find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" PATHS "${Maya_INCLUDE_DIR}" NO_CACHE)
 find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" PATHS "${Maya_LIBRARY_DIR}" NO_CACHE)
 find_library(Maya_TBB_LIBRARY_RELEASE "tbb" PATHS "${Maya_LIBRARY_DIR}" NO_CACHE)
 
-if(Maya_TBB_LIBRARY_DEBUG
-   OR Maya_TBB_LIBRARY_RELEASE
-   AND Maya_TBB_INCLUDE_DIR
-)
-    set(Maya_TBB_TARGET_NAME Maya::TBB)
-
+if(Maya_TBB_LIBRARY_RELEASE AND Maya_TBB_INCLUDE_DIR)
     set(Maya_TBB_FOUND TRUE)
-
-    if(NOT TARGET ${Maya_TBB_TARGET_NAME})
-        add_library(${Maya_TBB_TARGET_NAME} UNKNOWN IMPORTED)
-    endif()
-
-    set_target_properties(${Maya_TBB_TARGET_NAME}
-        PROPERTIES
-            IMPORTED_LOCATION "${Maya_TBB_LIBRARY_RELEASE}"
-            INTERFACE_INCLUDE_DIRECTORIES "${Maya_TBB_INCLUDE_DIR}"
-    )
-
-    if(Maya_TBB_LIBRARY_DEBUG)
-        set_property(TARGET ${Maya_TBB_TARGET_NAME}
-            APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG
-        )
-        set_target_properties(${Maya_TBB_TARGET_NAME}
-            PROPERTIES
-                IMPORTED_LOCATION_DEBUG "${Maya_TBB_LIBRARY_DEBUG}")
-    endif()
-
-    unset(Maya_TBB_TARGET_NAME)
 endif()
 
-unset(Maya_TBB_INCLUDE_DIR)
-unset(Maya_TBB_LIBRARY_DEBUG)
-unset(Maya_TBB_LIBRARY_RELEASE)
+function(maya_find_executable)
+    if(APPLE)
+        set(DEFAULT_INSTALL_DIR "/Applications/Autodesk")
+    elseif(UNIX)
+        set(DEFAULT_INSTALL_DIR "/usr/autodesk")
+    elseif(WIN32)
+        set(DEFAULT_INSTALL_DIR "C:\\Program Files\\Autodesk")
+    endif()
+
+    find_program(Maya_EXECUTABLE
+        "maya"
+        PATHS
+            "${MAYA_LOCATION}"
+            "$ENV{MAYA_LOCATION}"
+            "${DEFAULT_INSTALL_DIR}"
+        PATH_SUFFIXES
+            "bin"
+            "maya${Maya_VERSION_MAJOR}/Maya.app/Contents/bin"
+        DOC
+            "Absolute path to Maya executable."
+    )
+
+    set(Maya_EXECUTABLE "${Maya_EXECUTABLE}" PARENT_SCOPE)
+endfunction()
+
+maya_find_executable()
 
 include(FindPackageHandleStandardArgs)
 
@@ -271,23 +241,59 @@ mark_as_advanced(
     Maya_EXECUTABLE
 )
 
+function(maya_add_import_target TARGET_SUFFIX)
+    cmake_parse_arguments(
+        TARGET
+        ""
+        "INCLUDE_DIR;LIBRARY_DEBUG;LIBRARY_RELEASE"
+        ""
+        ${ARGN}
+    )
+
+    set(TARGET_NAME "Maya::${TARGET_SUFFIX}")
+
+    if(NOT TARGET ${TARGET_NAME})
+        add_library(${TARGET_NAME} UNKNOWN IMPORTED)
+    endif()
+
+    set_target_properties(${TARGET_NAME}
+        PROPERTIES
+            IMPORTED_LOCATION "${TARGET_LIBRARY_RELEASE}"
+            INTERFACE_INCLUDE_DIRECTORIES "${TARGET_INCLUDE_DIR}"
+    )
+
+    if(TARGET_LIBRARY_DEBUG)
+        set_property(TARGET ${TARGET_NAME}
+            APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG
+        )
+        set_target_properties(${TARGET_NAME}
+            PROPERTIES
+                IMPORTED_LOCATION_DEBUG "${TARGET_LIBRARY_DEBUG}")
+    endif()
+endfunction()
+
 foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
 
-    if(Maya_${Maya_LIB_NAME}_LIBRARY)
-        set(Maya_TARGET_NAME Maya::${Maya_COMPONENT_NAME})
-
-        if(NOT TARGET ${Maya_TARGET_NAME})
-            add_library(${Maya_TARGET_NAME} UNKNOWN IMPORTED)
-            set_target_properties(${Maya_TARGET_NAME}
-                PROPERTIES
-                    IMPORTED_LOCATION "${Maya_${Maya_LIB_NAME}_LIBRARY}"
-                    INTERFACE_INCLUDE_DIRECTORIES "${Maya_INCLUDE_DIR}"
-            )
-        endif()
+    if(Maya_${Maya_COMPONENT_NAME}_FOUND)
+        maya_add_import_target(${Maya_COMPONENT_NAME}
+            INCLUDE_DIR "${Maya_INCLUDE_DIR}"
+            LIBRARY_RELEASE "${Maya_${Maya_LIB_NAME}_LIBRARY}"
+        )
     endif()
 endforeach()
 
+unset(Maya_COMPONENT_NAME)
+unset(Maya_LIB_NAME)
 unset(Maya_COMPONENTS)
+
+if(Maya_TBB_FOUND)
+    maya_add_import_target(TBB
+        INCLUDE_DIR ${Maya_TBB_INCLUDE_DIR}
+        LIBRARY_DEBUG ${Maya_TBB_LIBRARY_DEBUG}
+        LIBRARY_RELEASE ${Maya_TBB_LIBRARY_RELEASE}
+    )
+endif()
+
 unset(Maya_INCLUDE_DIR)
 unset(Maya_LIBRARY_DIR)

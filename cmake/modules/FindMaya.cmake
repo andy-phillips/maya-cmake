@@ -50,30 +50,47 @@ The following cache variables may also be set:
 ``Maya_SDK_ROOT_DIR``
     Path to the Maya SDK (defined if not set).
 
+``Maya_EXECUTABLE``
+    Path to the Maya executable (defined if not set).
+
 #]=============================================================================]
 
 find_path(Maya_SDK_ROOT_DIR
     "include/maya/MFn.h"
     PATHS
-        "${MAYA_DEVKIT_LOCATION}"
         "${DEVKIT_LOCATION}"
-        "$ENV{MAYA_DEVKIT_LOCATION}"
+        "$ENV{DEVKIT_LOCATION}"
+        "$ENV{HOME}"
+        "$ENV{USERPROFILE}"
     PATH_SUFFIXES
         "devkit"
+        "devkitBase"
+    DOC
+        "Absolute path to the Maya SDK (devkit) directory."
 )
 
-macro(maya_set_failure_message NAME_VAR PATH_VAR)
-    if(DEFINED ${NAME_VAR} AND NOT EXISTS "${PATH_VAR}")
-        set(Maya_FAILURE_MESSAGE "${NAME_VAR} is defined but the path does not exist: ")
-        string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "${PATH_VAR}")
-    else()
-        set(Maya_FAILURE_MESSAGE "${NAME_VAR} is not defined")
-    endif()
-endmacro()
-
 if(NOT Maya_SDK_ROOT_DIR)
-    maya_set_failure_message(MAYA_DEVKIT_LOCATION "${MAYA_DEVKIT_LOCATION}")
+    set(Maya_FAILURE_MESSAGE
+        "Maya SDK could not be found. Check that is installed on the system, "
+    )
+    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} 
+        "and the DEVKIT_LOCATION environment variable is set."
+    )
 endif()
+
+if(Maya_SDK_ROOT_DIR AND NOT EXISTS "${Maya_SDK_ROOT_DIR}")
+    set(Maya_FAILURE_MESSAGE "Maya_SDK_ROOT_DIR variable is set but the path does not exist: ")
+    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "${Maya_SDK_ROOT_DIR}")
+endif()
+
+find_path(Maya_INCLUDE_DIR
+    "maya/MFn.h"
+    PATHS
+        "${Maya_SDK_ROOT_DIR}"
+    PATH_SUFFIXES
+        "include"
+    NO_CACHE
+)
 
 find_path(Maya_LIBRARY_DIR
     "libOpenMaya.dylib"
@@ -82,15 +99,6 @@ find_path(Maya_LIBRARY_DIR
         "${Maya_SDK_ROOT_DIR}"
     PATH_SUFFIXES
         "lib"
-    NO_CACHE
-)
-
-find_path(Maya_INCLUDE_DIR
-    "maya/MFn.h"
-    PATHS
-        "${Maya_SDK_ROOT_DIR}"
-    PATH_SUFFIXES
-        "include"
     NO_CACHE
 )
 
@@ -136,7 +144,8 @@ function(maya_find_executable)
         PATH_SUFFIXES
             "bin"
             "maya${Maya_VERSION_MAJOR}/Maya.app/Contents/bin"
-        NO_CACHE
+        DOC
+            "Absolute path to Maya executable."
     )
 
     set(Maya_EXECUTABLE "${Maya_EXECUTABLE}" PARENT_SCOPE)
@@ -181,9 +190,9 @@ foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     endif()
 endforeach()
 
+find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" PATHS "${Maya_INCLUDE_DIR}" NO_CACHE)
 find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" PATHS "${Maya_LIBRARY_DIR}" NO_CACHE)
 find_library(Maya_TBB_LIBRARY_RELEASE "tbb" PATHS "${Maya_LIBRARY_DIR}" NO_CACHE)
-find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" PATHS "${Maya_INCLUDE_DIR}" NO_CACHE)
 
 if(Maya_TBB_LIBRARY_DEBUG
    OR Maya_TBB_LIBRARY_RELEASE
@@ -215,9 +224,9 @@ if(Maya_TBB_LIBRARY_DEBUG
     unset(Maya_TBB_TARGET_NAME)
 endif()
 
+unset(Maya_TBB_INCLUDE_DIR)
 unset(Maya_TBB_LIBRARY_DEBUG)
 unset(Maya_TBB_LIBRARY_RELEASE)
-unset(Maya_TBB_INCLUDE_DIR)
 
 include(FindPackageHandleStandardArgs)
 
@@ -228,12 +237,16 @@ find_package_handle_standard_args(
     VERSION_VAR Maya_VERSION
     REQUIRED_VARS
         Maya_SDK_ROOT_DIR
-        Maya_EXECUTABLE
     HANDLE_VERSION_RANGE
     HANDLE_COMPONENTS
     REASON_FAILURE_MESSAGE "${Maya_FAILURE_MESSAGE}"
 )
 unset(Maya_FAILURE_MESSAGE)
+
+mark_as_advanced(
+    Maya_SDK_ROOT_DIR
+    Maya_EXECUTABLE
+)
 
 foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
@@ -252,6 +265,6 @@ foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     endif()
 endforeach()
 
+unset(Maya_COMPONENTS)
 unset(Maya_INCLUDE_DIR)
 unset(Maya_LIBRARY_DIR)
-unset(Maya_COMPONENTS)

@@ -31,11 +31,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Download Maya SDK
-        run:
+        run: |
           curl -o $HOME/devkit.tgz https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Linux.tgz
+          cd $HOME
+          ls -l
       - name: Extract SDK Files
-        run:
+        run: |
+          cd $HOME
           tar -xvf $HOME/devkit.tgz
+          ls -l
       - name: Create build directory
         run:
           mkdir .build

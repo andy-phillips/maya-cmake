@@ -1,0 +1,40 @@
+name: Build and test
+
+run-name: ${{ github.actor }} is building and testing
+
+# Run the jobs for pushes and pull requests targetting main branch.
+# NOTE: Strategy matrix can be mostly replaced with presets.
+on: 
+  push:
+    branches:
+      - CI
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        build:
+          - 1
+        include:
+          - build: 1
+            build-type: Release
+            build-tests: 'ON'
+
+    name: 'Ubuntu 20.04
+      <type=${{ matrix.build-type }},
+       tests=${{ matrix.build-tests }}>'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Create build directories
+        run: |
+          mkdir ./build
+          mkdir ./install
+      - name: Configure
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+                -DCMAKE_BINARY_DIR="${CMAKE_SOURCE_DIR}/.build" \
+                -DCMAKE_INSTALL_PREFIX="${CMAKE_SOURCE_DIR}/.install"

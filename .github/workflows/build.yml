@@ -1,6 +1,6 @@
 name: Build and test
 
-run-name: ${{ github.actor }} is building and testing
+run-name:  Test build by @${{ github.actor }}
 
 # Run the jobs for pushes and pull requests targetting main branch.
 # NOTE: Strategy matrix can be mostly replaced with presets.
@@ -31,20 +31,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Download Maya SDK
-        run: |
-          curl -o devkit.tgz https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Linux.tgz
-          ls -l
+        run:
+          curl -o ~/devkit.tgz https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Linux.tgz
+        working-directory: ~/work
       - name: Extract SDK Files
-        run: |
+        run:
           tar -xvf devkit.tgz
-          ls -l
-      - name: Create build directories
-        run: |
-          pwd
-          mkdir build
+        working-directory: ~/work
+      - name: Create build directory
+        run:
+          mkdir .build
       - name: Configure
         run: |
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-                -DMaya_SDK_ROOT_DIR=devkitBase \
-                -S . \
-                -B build
+                -DMaya_SDK_ROOT_DIR=~/work/devkitBase \
+                -S .. \
+                -B .
+        working-directory: .build
+      - name: Build
+        run: |
+          cmake --build . \
+                --verbose \
+                --target test \
+                --config ${{ matrix.build-type }}
+        working-directory: .build

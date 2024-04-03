@@ -12,6 +12,7 @@ on:
 jobs:
   linux-build:
     runs-on: ubuntu-20.04
+    timeout-minutes: 3
 
     strategy:
       matrix:
@@ -29,6 +30,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Download Maya SDK
+        run: |
+          curl -# -O https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Linux.tgz
       - name: Create build directories
         run: |
           mkdir .build

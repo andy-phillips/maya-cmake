@@ -116,8 +116,9 @@ find_path(Maya_INCLUDE_DIR
 )
 
 find_path(Maya_LIBRARY_DIR
-    "libOpenMaya.dylib"
     "OpenMaya.lib"
+    "libOpenMaya.so"
+    "libOpenMaya.dylib"
     PATHS
         "${Maya_SDK_ROOT_DIR}"
     PATH_SUFFIXES
@@ -129,18 +130,19 @@ function(maya_extract_version_from_file FILE_PATH)
     file(STRINGS "${FILE_PATH}" VERSION_DEFINE REGEX "#define MAYA_API_VERSION.*$")
     string(REGEX MATCHALL "[0-9]+" API_VERSION "${VERSION_DEFINE}")
 
-    string(SUBSTRING ${API_VERSION} "0" "4" Maya_VERSION_MAJOR)
-    set(Maya_VERSION_MAJOR ${Maya_VERSION_MAJOR} PARENT_SCOPE)
+    string(SUBSTRING "${API_VERSION}" "0" "4" Maya_VERSION_MAJOR)
+    set(Maya_VERSION_MAJOR "${Maya_VERSION_MAJOR}" PARENT_SCOPE)
 
     string(SUBSTRING ${API_VERSION} "4" "2" Maya_VERSION_MINOR)
-    string(REGEX REPLACE "(^0+)" "" Maya_VERSION_MINOR ${Maya_VERSION_MINOR})
-    string(COMPARE EQUAL ${Maya_VERSION_MINOR} "" VERSION_IS_ZERO)
+    string(REGEX REPLACE "(^0+)" "" Maya_VERSION_MINOR "${Maya_VERSION_MINOR}")
+    string(COMPARE EQUAL "${Maya_VERSION_MINOR}" "" VERSION_IS_ZERO)
 
     if(VERSION_IS_ZERO)
-        set(Maya_VERSION_MINOR 0 PARENT_SCOPE)
+        set(Maya_VERSION_MINOR "0")
     else()
-        set(Maya_VERSION_MINOR ${Maya_VERSION_MINOR} PARENT_SCOPE)
+        set(Maya_VERSION_MINOR "${Maya_VERSION_MINOR}")
     endif()
+    set(Maya_VERSION_MINOR "${Maya_VERSION_MINOR}" PARENT_SCOPE)
 
     set(Maya_VERSION "${Maya_VERSION_MAJOR}.${Maya_VERSION_MINOR}" PARENT_SCOPE)
 endfunction()
@@ -172,7 +174,8 @@ foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
 
     find_library(
-        Maya_${Maya_LIB_NAME}_LIBRARY ${Maya_LIB_NAME}
+        Maya_${Maya_LIB_NAME}_LIBRARY
+        ${Maya_LIB_NAME}
         PATHS
             "${Maya_LIBRARY_DIR}"
         NO_CACHE

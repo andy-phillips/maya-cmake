@@ -44,5 +44,6 @@ jobs:
       - name: Configure
         run: |
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+                -DMaya_SDK_ROOT_DIR=devkitBase
                 -S . \
                 -B .build

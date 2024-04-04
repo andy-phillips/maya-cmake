@@ -115,10 +115,6 @@ find_path(Maya_INCLUDE_DIR
     NO_CACHE
 )
 
-if(Maya_SDK_ROOT_DIR AND NOT Maya_INCLUDE_DIR)
-    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "Failed to find Maya include directory. ")
-endif()
-
 find_path(Maya_LIBRARY_DIR
     "OpenMaya.lib"
     "libOpenMaya.so"
@@ -130,9 +126,19 @@ find_path(Maya_LIBRARY_DIR
     NO_CACHE
 )
 
-if(Maya_SDK_ROOT_DIR AND NOT Maya_LIBRARY_DIR)
-    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "Failed to find Maya library directory. ")
+if(Maya_SDK_ROOT_DIR)
+    if (NOT Maya_INCLUDE_DIR AND NOT Maya_LIBRARY_DIR)
+        set(Maya_FAILURE_MESSAGE "Missing include and lib directory in directory: ")
+    elseif (NOT Maya_INCLUDE_DIR)
+        set(Maya_FAILURE_MESSAGE "Missing include directory in directory: ")
+    elseif (NOT Maya_LIBRARY_DIR)
+        set(Maya_FAILURE_MESSAGE "Missing lib directory in directory: ")
+    endif()
+
+    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "${Maya_SDK_ROOT_DIR}")
 endif()
+
+message("${Maya_FAILURE_MESSAGE}")
 
 function(maya_extract_version_from_file FILE_PATH)
     file(STRINGS "${FILE_PATH}" VERSION_DEFINE REGEX "#define MAYA_API_VERSION.*$")
@@ -241,6 +247,8 @@ find_package_handle_standard_args(
     VERSION_VAR Maya_VERSION
     REQUIRED_VARS
         Maya_SDK_ROOT_DIR
+        Maya_INCLUDE_DIR
+        Maya_LIBRARY_DIR
     HANDLE_VERSION_RANGE
     HANDLE_COMPONENTS
     REASON_FAILURE_MESSAGE "${Maya_FAILURE_MESSAGE}"

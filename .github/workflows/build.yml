@@ -8,11 +8,11 @@ on:
       - CI
 
 jobs:
-  unix_build_test:
+  linux_build_test:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         build-type: [Release]
         maya-version: [2024.2, 2025]
         include:
@@ -22,15 +22,8 @@ jobs:
             - os: ubuntu-latest
               maya-version: 2025
               devkit-url: https://autodesk-adn-transfer.s3.us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2025/Autodesk_Maya_2025_DEVKIT_Linux.tgz
-            - os: macos-latest
-              maya-version: 2024.2
-              devkit-url: https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Mac.dmg
-            - os: macos-latest
-              maya-version: 2025
-              devkit-url: https://autodesk-adn-transfer.s3.us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2025/Autodesk_Maya_2025_DEVKIT_Mac.dmg
 
     name: '${{ matrix.os }} <maya-version=${{ matrix.maya-version }}, build-type=${{ matrix.build-type }}>'
-    
     runs-on: ${{ matrix.os }}
     timeout-minutes: 3
 
@@ -45,6 +38,56 @@ jobs:
         run: |
           cd $HOME/work
           tar -xf devkit.tgz devkitBase/include devkitBase/lib
+      - name: Create build directory
+        run:
+          mkdir .build
+      - name: Configure
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+                -DMaya_SDK_ROOT_DIR=$HOME/work/devkitBase \
+                ..
+        working-directory: .build
+      - name: Build
+        run: |
+          cmake --build . \
+                --config ${{ matrix.build-type }} \
+                --verbose \
+                --target test
+        working-directory: .build
+
+  macos_build_test:
+
+    strategy:
+      matrix:
+        os: [macos-latest]
+        build-type: [Release]
+        maya-version: [2024.2, 2025]
+        include:
+          - os: macos-latest
+            maya-version: 2024.2
+            devkit-url: https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Mac.dmg
+          - os: macos-latest
+            maya-version: 2025
+            devkit-url: https://autodesk-adn-transfer.s3.us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2025/Autodesk_Maya_2025_DEVKIT_Mac.dmg
+      
+    name: '${{ matrix.os }} <maya-version=${{ matrix.maya-version }}, build-type=${{ matrix.build-type }}>'
+    runs-on: ${{ matrix.os }}
+
+    timeout-minutes: 3
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download Maya SDK
+        run: |
+          cd $HOME/work
+          curl -o devkit.dmg ${{ matrix.devkit-url }}
+      - name: Extract SDK Files
+        run: |
+          cd $HOME/work
+          open devkit.dmg
+          cp -r /Volumes/devkitBase/include $HOME/work/devkitBase/include
+          cp -r /Volumes/devkitBase/lib $HOME/work/devkitBase/lib
       - name: Create build directory
         run:
           mkdir .build

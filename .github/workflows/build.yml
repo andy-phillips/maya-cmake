@@ -85,7 +85,8 @@ jobs:
       - name: Extract SDK Files
         run: |
           cd $HOME/work
-          hdiutil attach -noverify devkit.dmg         
+          hdiutil attach -noverify devkit.dmg
+          cp -r /Volumes/devkitBase $HOME/work/devkitBase   
           hdiutil detach /Volumes/devkitBase
       - name: Create build directory
         run:

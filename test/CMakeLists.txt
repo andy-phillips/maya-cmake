@@ -8,12 +8,28 @@ target_sources(
         plugin.cpp
 )
 
-find_package(
-    Maya 2024 REQUIRED
-    COMPONENTS
-        Foundation
-        Maya
+set(MAYA_COMPONENTS_TO_FIND
+    Foundation
+    Maya
+    Anim
+    FX
+    Render
+    UI
 )
+
+if(MAYA_CMAKE_MAYA_VERSION)
+    find_package(
+        Maya ${MAYA_CMAKE_MAYA_VERSION} EXACT REQUIRED
+        COMPONENTS
+            ${MAYA_COMPONENTS_TO_FIND}
+    )
+else()
+    find_package(
+        Maya REQUIRED
+        COMPONENTS
+            ${MAYA_COMPONENTS_TO_FIND}
+    )
+endif()
 
 target_link_libraries(
     ${LIB_NAME}

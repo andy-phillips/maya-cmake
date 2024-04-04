@@ -135,7 +135,7 @@ jobs:
           Invoke-WebRequest ${{ matrix.devkit-url }} -OutFile devkit.zip
       - name: Extract SDK Files
         run: |
-          Expand-Archive -Path devkit.zip
+          Expand-Archive -Path devkit.zip -DestinationPath devkitBase
       - name: Create build directory
         run:
           mkdir .build

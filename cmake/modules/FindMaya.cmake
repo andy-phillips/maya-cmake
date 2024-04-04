@@ -115,7 +115,7 @@ find_path(Maya_INCLUDE_DIR
     NO_CACHE
 )
 
-if(NOT Maya_INCLUDE_DIR)
+if(Maya_SDK_ROOT_DIR AND NOT Maya_INCLUDE_DIR)
     string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "Failed to find Maya include directory. ")
 endif()
 
@@ -130,7 +130,7 @@ find_path(Maya_LIBRARY_DIR
     NO_CACHE
 )
 
-if(NOT Maya_LIBRARY_DIR)
+if(Maya_SDK_ROOT_DIR AND NOT Maya_LIBRARY_DIR)
     string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "Failed to find Maya library directory. ")
 endif()
 

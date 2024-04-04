@@ -146,7 +146,6 @@ jobs:
           mkdir .build
       - name: Configure
         run: |
-          echo $GITHUB_WORKSPACE
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}\devkitBase" `
                 ..

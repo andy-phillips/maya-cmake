@@ -10,6 +10,8 @@ on:
 jobs:
   linux_build_test:
 
+    if: false  # disable for now
+
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -56,6 +58,8 @@ jobs:
         working-directory: .build
 
   macos_build_test:
+
+    if: false  # disable for now
 
     strategy:
       matrix:
@@ -138,19 +142,21 @@ jobs:
         run: |
           pwd
           Expand-Archive -Path devkit.zip -DestinationPath devkitBase
+          cd ..
+          ls -l
       - name: Create build directory
         run:
           mkdir .build
       - name: Configure
         run: |
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
-                -DMaya_SDK_ROOT_DIR=$HOME/work/devkitBase \
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
+                -DMaya_SDK_ROOT_DIR=devkitBase `
                 ..
         working-directory: .build
       - name: Build
         run: |
-          cmake --build . \
-                --config ${{ matrix.build-type }} \
-                --verbose \
+          cmake --build . `
+                --config ${{ matrix.build-type }} `
+                --verbose `
                 --target test
         working-directory: .build

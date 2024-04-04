@@ -30,7 +30,7 @@ jobs:
       - name: Download Maya SDK
         run: |
           cd $HOME/work
-          curl -o devkit.tgz https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Linux.tgz
+          curl -o devkit.tgz ${{ matrix.devkit-url }}
       - name: Extract SDK Files
         run: |
           cd $HOME/work

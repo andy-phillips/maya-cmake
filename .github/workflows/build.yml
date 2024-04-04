@@ -137,10 +137,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Download Maya SDK
         run: |
-          Invoke-WebRequest ${{ matrix.devkit-url }} -OutFile "$env:GITHUB_WORKSPACE\devkit.zip"
+          Invoke-WebRequest ${{ matrix.devkit-url }} -OutFile "${{ github.workspace }}\devkit.zip"
       - name: Extract SDK Files
         run: |
-          Expand-Archive -Path devkit.zip -DestinationPath "$env:GITHUB_WORKSPACE\devkitBase"
+          Expand-Archive -Path devkit.zip -DestinationPath "${{ github.workspace }}\devkitBase"
       - name: Create build directory
         run:
           mkdir .build
@@ -148,7 +148,7 @@ jobs:
         run: |
           echo $GITHUB_WORKSPACE
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} `
-                -DMaya_SDK_ROOT_DIR="$env:GITHUB_WORKSPACE\devkitBase" `
+                -DMaya_SDK_ROOT_DIR="${{ github.workspace }}\devkitBase" `
                 ..
         working-directory: .build
       - name: Build

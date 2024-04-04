@@ -85,9 +85,8 @@ jobs:
       - name: Extract SDK Files
         run: |
           cd $HOME/work
-          open devkit.dmg
-          cp -r /Volumes/devkitBase/include $HOME/work/devkitBase/include
-          cp -r /Volumes/devkitBase/lib $HOME/work/devkitBase/lib
+          hdiutil attach -noverify devkit.dmg         
+          hdiutil detach /Volumes/devkitBase
       - name: Create build directory
         run:
           mkdir .build

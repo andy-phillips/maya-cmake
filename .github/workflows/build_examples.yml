@@ -46,6 +46,8 @@ jobs:
         run: |
           cmake -G "${{ matrix.build-generator }}" \
                 -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+                -DMAYA_CMAKE_BUILD_EXAMPLES=ON \
+                -DMAYA_CMAKE_MAYA_VERSION=${{ matrix.maya-version }} \
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}/devkitBase" \
                 ..
         working-directory: .build
@@ -94,6 +96,8 @@ jobs:
       - name: Configure
         run: |
           cmake -G "${{ matrix.build-generator }}" \
+                -DMAYA_CMAKE_BUILD_EXAMPLES=ON \
+                -DMAYA_CMAKE_MAYA_VERSION=${{ matrix.maya-version }} \
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}/devkitBase" \
                 ..
         working-directory: .build
@@ -144,6 +148,8 @@ jobs:
       - name: Configure
         run: |
           cmake -G "${{ matrix.build-generator }}" `
+                -DMAYA_CMAKE_BUILD_EXAMPLES=ON `
+                -DMAYA_CMAKE_MAYA_VERSION=${{ matrix.maya-version }} `
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}\devkitBase" `
                 ..
         working-directory: .build

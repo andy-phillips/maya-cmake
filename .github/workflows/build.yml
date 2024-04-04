@@ -1,32 +1,29 @@
 name: Build and test
 
-run-name:  Test build by @${{ github.actor }}
+run-name: Test build by @${{ github.actor }}
 
-# Run the jobs for pushes and pull requests targetting main branch.
-# NOTE: Strategy matrix can be mostly replaced with presets.
 on: 
   push:
     branches:
       - CI
 
 jobs:
-  linux-build:
-    runs-on: ubuntu-20.04
+  build_test:
+    runs-on: ubuntu-latest
     timeout-minutes: 3
 
     strategy:
       matrix:
-        build:
-          - 1
+        build-type: [Release]
+        maya-version: [2024.2, 2025]
         include:
-          - build: 1
-            build-type: Release
-            build-tests: 'ON'
+            - maya-version: 2024.2
+              devkit-url: https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2024/Autodesk_Maya_2024_2_Update_DEVKIT_Linux.tgz
+            - maya-version: 2025
+              devkit-url: https://autodesk-adn-transfer.s3.us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2025/Autodesk_Maya_2025_DEVKIT_Linux.tgz
 
-    name: 'Ubuntu 20.04
-      <type=${{ matrix.build-type }},
-       tests=${{ matrix.build-tests }}>'
-
+    name: 'Ubuntu <maya-version=${{ matrix.maya-version }}, build-type=${{ matrix.build-type }}>'
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,5 +48,6 @@ jobs:
         run: |
           cmake --build . \
                 --config ${{ matrix.build-type }} \
+                --verbose \
                 --target test
         working-directory: .build

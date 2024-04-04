@@ -1,14 +1,16 @@
-name: Build and test
+name: Build Examples
 
-run-name: Test build by @${{ github.actor }}
-
-on: 
-  push:
+on:
+  pull_request:
     branches:
-      - CI
+      - dev
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  linux_build_test:
+  linux_build_examples:
 
     strategy:
       matrix:
@@ -55,7 +57,7 @@ jobs:
                 --target test
         working-directory: .build
 
-  macos_build_test:
+  macos_build_examples:
 
     strategy:
       matrix:
@@ -103,7 +105,7 @@ jobs:
                 --target test
         working-directory: .build
 
-  windows_build_test:
+  windows_build_examples:
 
     defaults:
       run:

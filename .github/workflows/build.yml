@@ -140,7 +140,7 @@ jobs:
           Invoke-WebRequest ${{ matrix.devkit-url }} -OutFile "${{ github.workspace }}\devkit.zip"
       - name: Extract SDK Files
         run: |
-          Expand-Archive -Path devkit.zip -DestinationPath "${{ github.workspace }}\devkitBase"
+          Expand-Archive -Path devkit.zip -DestinationPath "${{ github.workspace }}"
       - name: Create build directory
         run:
           mkdir .build

@@ -106,8 +106,6 @@ if(Maya_SDK_ROOT_DIR AND NOT EXISTS "${Maya_SDK_ROOT_DIR}")
     string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "${Maya_SDK_ROOT_DIR}")
 endif()
 
-message("Root Dir: ${Maya_SDK_ROOT_DIR}")
-
 find_path(Maya_INCLUDE_DIR
     "maya/MFn.h"
     PATHS
@@ -117,7 +115,9 @@ find_path(Maya_INCLUDE_DIR
     NO_CACHE
 )
 
-message("Include Dir: ${Maya_INCLUDE_DIR}")
+if(NOT Maya_INCLUDE_DIR)
+    set(Maya_FAILURE_MESSAGE "Failed to find Maya include directory")
+endif()
 
 find_path(Maya_LIBRARY_DIR
     "OpenMaya.lib"
@@ -130,7 +130,9 @@ find_path(Maya_LIBRARY_DIR
     NO_CACHE
 )
 
-message("Lib Dir: ${Maya_LIBRARY_DIR}")
+if(NOT Maya_LIBRARY_DIR)
+    set(Maya_FAILURE_MESSAGE "Failed to find Maya library directory")
+endif()
 
 function(maya_extract_version_from_file FILE_PATH)
     file(STRINGS "${FILE_PATH}" VERSION_DEFINE REGEX "#define MAYA_API_VERSION.*$")

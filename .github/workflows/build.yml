@@ -85,8 +85,9 @@ jobs:
         run: |
           cd $HOME/work
           hdiutil attach -noverify devkit.dmg
-          cp -r /Volumes/devkitBase/include $HOME/work/devkitBase/include
-          cp -r /Volumes/devkitBase/lib $HOME/work/devkitBase/lib
+          mkdir devkitBase
+          cp -r /Volumes/devkitBase/include $HOME/work/devkitBase
+          cp -r /Volumes/devkitBase/lib $HOME/work/devkitBase
           hdiutil detach /Volumes/devkitBase
       - name: Create build directory
         run:
@@ -132,11 +133,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Download Maya SDK
         run: |
-          cd $HOME/work
           Invoke-WebRequest ${{ matrix.devkit-url }} -OutFile devkit.zip
       - name: Extract SDK Files
         run: |
-          cd $HOME/work
+          pwd
           Expand-Archive -Path devkit.zip -DestinationPath devkitBase
       - name: Create build directory
         run:

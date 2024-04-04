@@ -42,7 +42,7 @@ jobs:
           mkdir .build
       - name: Configure
         run: |
-          cmake -G ${{ matrix.build-generator }} \
+          cmake -G "${{ matrix.build-generator }}" \
                 -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}/devkitBase" \
                 ..
@@ -84,7 +84,6 @@ jobs:
       - name: Extract SDK Files
         run: |
           hdiutil attach -noverify devkit.dmg
-          mkdir devkitBase
           cp -r /Volumes/devkitBase devkitBase
           hdiutil detach /Volumes/devkitBase
       - name: Create build directory
@@ -92,7 +91,7 @@ jobs:
           mkdir .build
       - name: Configure
         run: |
-          cmake -G ${{ matrix.build-generator }} \
+          cmake -G "${{ matrix.build-generator }}" \
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}/devkitBase" \
                 ..
         working-directory: .build
@@ -142,7 +141,7 @@ jobs:
           mkdir .build
       - name: Configure
         run: |
-          cmake -G ${{ matrix.build-generator }} `
+          cmake -G "${{ matrix.build-generator }}" `
                 -DMaya_SDK_ROOT_DIR="${{ github.workspace }}\devkitBase" `
                 ..
         working-directory: .build

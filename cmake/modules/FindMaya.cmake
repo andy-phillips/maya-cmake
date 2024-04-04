@@ -116,7 +116,7 @@ find_path(Maya_INCLUDE_DIR
 )
 
 if(NOT Maya_INCLUDE_DIR)
-    set(Maya_FAILURE_MESSAGE "Failed to find Maya include directory")
+    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "Failed to find Maya include directory. ")
 endif()
 
 find_path(Maya_LIBRARY_DIR
@@ -131,7 +131,7 @@ find_path(Maya_LIBRARY_DIR
 )
 
 if(NOT Maya_LIBRARY_DIR)
-    set(Maya_FAILURE_MESSAGE "Failed to find Maya library directory")
+    string(CONCAT Maya_FAILURE_MESSAGE ${Maya_FAILURE_MESSAGE} "Failed to find Maya library directory. ")
 endif()
 
 function(maya_extract_version_from_file FILE_PATH)

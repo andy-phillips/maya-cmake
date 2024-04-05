@@ -78,13 +78,18 @@ The following cache variables may also be set:
 
 #]=============================================================================]
 
+# If the environment variable DEVKIT_LOCATION has changed, clear the cache variable.
+# This allows a re-configure without the user having to clear the cache first.
+if (DEFINED ENV{DEVKIT_LOCATION})
+    if(NOT "$ENV{DEVKIT_LOCATION}" STREQUAL "${Maya_DEVKIT_LOCATION_INTERNAL}")
+        unset(Maya_SDK_ROOT_DIR CACHE)
+    endif()
+endif()
+
 find_path(Maya_SDK_ROOT_DIR
-    "include/maya/MFn.h"
+    "include/maya/MTypes.h"
     PATHS
-        "${DEVKIT_LOCATION}"
         "$ENV{DEVKIT_LOCATION}"
-        "$ENV{HOME}"
-        "$ENV{USERPROFILE}"
     PATH_SUFFIXES
         "devkit"
         "devkitBase"
@@ -107,8 +112,8 @@ if(Maya_SDK_ROOT_DIR AND NOT EXISTS "${Maya_SDK_ROOT_DIR}")
 endif()
 
 find_path(Maya_INCLUDE_DIR
-    "maya/MFn.h"
-    PATHS
+    "maya/MTypes.h"
+    HINTS
         "${Maya_SDK_ROOT_DIR}"
     PATH_SUFFIXES
         "include"
@@ -119,7 +124,7 @@ find_path(Maya_LIBRARY_DIR
     "OpenMaya.lib"
     "libOpenMaya.so"
     "libOpenMaya.dylib"
-    PATHS
+    HINTS
         "${Maya_SDK_ROOT_DIR}"
     PATH_SUFFIXES
         "lib"
@@ -192,11 +197,11 @@ foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     find_library(
         Maya_${Maya_LIB_NAME}_LIBRARY
         ${Maya_LIB_NAME}
-        PATHS
+        HINTS
             "${Maya_LIBRARY_DIR}"
         NO_CACHE
-        # NO_CMAKE_SYSTEM_PATH needed to avoid conflicts between Maya's foundation library and
-        # OSX's foundation framework.
+        # NO_CMAKE_SYSTEM_PATH needed to avoid conflicts between Maya's foundation
+        # library and OSX's foundation framework.
         NO_CMAKE_SYSTEM_PATH
     )
 
@@ -205,9 +210,9 @@ foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     endif()
 endforeach()
 
-find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" PATHS "${Maya_INCLUDE_DIR}" NO_CACHE)
-find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" PATHS "${Maya_LIBRARY_DIR}" NO_CACHE)
-find_library(Maya_TBB_LIBRARY_RELEASE "tbb" PATHS "${Maya_LIBRARY_DIR}" NO_CACHE)
+find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" HINTS "${Maya_INCLUDE_DIR}" NO_CACHE)
+find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
+find_library(Maya_TBB_LIBRARY_RELEASE "tbb" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
 
 if(Maya_TBB_LIBRARY_RELEASE AND Maya_TBB_INCLUDE_DIR)
     set(Maya_TBB_FOUND TRUE)
@@ -225,7 +230,6 @@ function(maya_find_executable)
     find_program(Maya_EXECUTABLE
         "maya"
         PATHS
-            "${MAYA_LOCATION}"
             "$ENV{MAYA_LOCATION}"
             "${DEFAULT_INSTALL_DIR}"
         PATH_SUFFIXES
@@ -239,6 +243,15 @@ function(maya_find_executable)
 endfunction()
 
 maya_find_executable()
+
+# Cache the DEVKIT_LOCATION environment variable to monitor for changes.
+if(DEFINED ENV{DEVKIT_LOCATION})
+    set(Maya_DEVKIT_LOCATION_INTERNAL
+        "$ENV{DEVKIT_LOCATION}" CACHE INTERNAL
+        "Previously known value of the DEVKIT_LOCATION environment variable."
+        FORCE
+    )
+endif()
 
 include(FindPackageHandleStandardArgs)
 

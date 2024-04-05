@@ -25,7 +25,8 @@
 FindMaya
 --------
 
-Finds the Maya SDK (devkit) libraries and Maya specific versions of 3rd pary libraries.
+Finds the Maya SDK (devkit) libraries and Maya compatible versions of 3rd party 
+libraries deployed with the SDK.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -50,6 +51,9 @@ This module provides the following imported targets, if found:
 ``Maya::UI``
     The OpenMayaUI library
 
+``Maya::TBB``
+    The Maya compatible version of the TBB library 
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -64,6 +68,9 @@ Result Variables
 
 ``Maya_VERSION``
   Full version in the ``X.Y`` format.
+
+``Maya_Xxxx_FOUND``
+    True if the component Xxxx is found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -172,14 +179,13 @@ if(Maya_INCLUDE_DIR AND EXISTS "${Maya_INCLUDE_DIR}/maya/MTypes.h")
     maya_extract_version_from_file("${Maya_INCLUDE_DIR}/maya/MTypes.h")
 endif()
 
-set(Maya_COMPONENTS
+set(Maya_ALL_COMPONENTS
     Foundation:Foundation
     Maya:OpenMaya
     Anim:OpenMayaAnim
     FX:OpenMayaFX
     Render:OpenMayaRender
     UI:OpenMayaUI
-    CLEW:clew
 )
 
 macro(maya_pair_to_key_value PAIR KEY VALUE)
@@ -191,8 +197,13 @@ macro(maya_pair_to_key_value PAIR KEY VALUE)
     endif()
 endmacro()
 
-foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
+foreach(COMPONENT_PAIR ${Maya_ALL_COMPONENTS})
     maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
+
+    # Skip any components that have not been specified explicity.
+    if(Maya_FIND_COMPONENTS AND NOT Maya_COMPONENT_NAME IN_LIST Maya_FIND_COMPONENTS)
+        continue()
+    endif()
 
     find_library(
         Maya_${Maya_LIB_NAME}_LIBRARY
@@ -210,12 +221,14 @@ foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
     endif()
 endforeach()
 
-find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" HINTS "${Maya_INCLUDE_DIR}" NO_CACHE)
-find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
-find_library(Maya_TBB_LIBRARY_RELEASE "tbb" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
+if((NOT Maya_FIND_COMPONENTS) OR (Maya_FIND_COMPONENTS AND "TBB" IN_LIST Maya_FIND_COMPONENTS))
+    find_path(Maya_TBB_INCLUDE_DIR "tbb/tbb.h" HINTS "${Maya_INCLUDE_DIR}" NO_CACHE)
+    find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
+    find_library(Maya_TBB_LIBRARY_RELEASE "tbb" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
 
-if(Maya_TBB_LIBRARY_RELEASE AND Maya_TBB_INCLUDE_DIR)
-    set(Maya_TBB_FOUND TRUE)
+    if(Maya_TBB_LIBRARY_RELEASE AND Maya_TBB_INCLUDE_DIR)
+        set(Maya_TBB_FOUND TRUE)
+    endif()
 endif()
 
 function(maya_find_executable)
@@ -306,7 +319,7 @@ function(maya_add_import_target TARGET_SUFFIX)
     endif()
 endfunction()
 
-foreach(COMPONENT_PAIR ${Maya_COMPONENTS})
+foreach(COMPONENT_PAIR ${Maya_ALL_COMPONENTS})
     maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
 
     if(Maya_${Maya_COMPONENT_NAME}_FOUND)
@@ -319,7 +332,7 @@ endforeach()
 
 unset(Maya_COMPONENT_NAME)
 unset(Maya_LIB_NAME)
-unset(Maya_COMPONENTS)
+unset(Maya_ALL_COMPONENTS)
 
 if(Maya_TBB_FOUND)
     maya_add_import_target(TBB

@@ -22,6 +22,9 @@ if(MAYA_CMAKE_MAYA_VERSION)
         Maya ${MAYA_CMAKE_MAYA_VERSION} EXACT REQUIRED
         COMPONENTS
             ${MAYA_COMPONENTS_TO_FIND}
+        OPTIONAL_COMPONENTS
+            TBB
+            CLEW
     )
 else()
     find_package(

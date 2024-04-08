@@ -54,6 +54,9 @@ This module provides the following imported targets, if found:
 ``Maya::TBB``
     The Maya compatible version of the TBB library 
 
+``Maya::CLEW``
+    The Maya compatible version of the CLEW library 
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -179,35 +182,18 @@ if(Maya_INCLUDE_DIR AND EXISTS "${Maya_INCLUDE_DIR}/maya/MTypes.h")
     maya_extract_version_from_file("${Maya_INCLUDE_DIR}/maya/MTypes.h")
 endif()
 
-set(Maya_ALL_COMPONENTS
-    Foundation:Foundation
-    Maya:OpenMaya
-    Anim:OpenMayaAnim
-    FX:OpenMayaFX
-    Render:OpenMayaRender
-    UI:OpenMayaUI
-)
+set(Maya_COMPONENT_NAMES Foundation Maya Anim FX Render UI)
+set(Maya_LIBRARY_NAMES Foundation OpenMaya OpenMayaAnim OpenMayaFX OpenMayaRender OpenMayaUI)
 
-macro(maya_pair_to_key_value PAIR KEY VALUE)
-    if(${PAIR} MATCHES "^([^:]+):(.*)$")
-        set(${KEY} ${CMAKE_MATCH_1})
-        set(${VALUE} ${CMAKE_MATCH_2})
-    else()
-        message(FATAL_ERROR "Invalid key / value pair: ${PAIR}")
-    endif()
-endmacro()
-
-foreach(COMPONENT_PAIR ${Maya_ALL_COMPONENTS})
-    maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
-
+foreach(COMPONENT IN ZIP_LISTS Maya_COMPONENT_NAMES Maya_LIBRARY_NAMES)
     # Skip any components that have not been specified explicity.
-    if(Maya_FIND_COMPONENTS AND NOT Maya_COMPONENT_NAME IN_LIST Maya_FIND_COMPONENTS)
+    if(Maya_FIND_COMPONENTS AND NOT COMPONENT_0 IN_LIST Maya_FIND_COMPONENTS)
         continue()
     endif()
 
     find_library(
-        Maya_${Maya_LIB_NAME}_LIBRARY
-        ${Maya_LIB_NAME}
+        Maya_${COMPONENT_1}_LIBRARY
+        ${COMPONENT_1}
         HINTS
             "${Maya_LIBRARY_DIR}"
         NO_CACHE
@@ -216,8 +202,8 @@ foreach(COMPONENT_PAIR ${Maya_ALL_COMPONENTS})
         NO_CMAKE_SYSTEM_PATH
     )
 
-    if(Maya_${Maya_LIB_NAME}_LIBRARY)
-        set(Maya_${Maya_COMPONENT_NAME}_FOUND TRUE)
+    if(Maya_${COMPONENT_1}_LIBRARY)
+        set(Maya_${COMPONENT_0}_FOUND TRUE)
     endif()
 endforeach()
 
@@ -226,8 +212,17 @@ if((NOT Maya_FIND_COMPONENTS) OR (Maya_FIND_COMPONENTS AND "TBB" IN_LIST Maya_FI
     find_library(Maya_TBB_LIBRARY_DEBUG "tbb_debug" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
     find_library(Maya_TBB_LIBRARY_RELEASE "tbb" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
 
-    if(Maya_TBB_LIBRARY_RELEASE AND Maya_TBB_INCLUDE_DIR)
+    if(Maya_TBB_INCLUDE_DIR AND Maya_TBB_LIBRARY_RELEASE)
         set(Maya_TBB_FOUND TRUE)
+    endif()
+endif()
+
+if((NOT Maya_FIND_COMPONENTS) OR (Maya_FIND_COMPONENTS AND "CLEW" IN_LIST Maya_FIND_COMPONENTS))
+    find_path(Maya_CLEW_INCLUDE_DIR "clew/clew.h" HINTS "${Maya_INCLUDE_DIR}" NO_CACHE)
+    find_library(Maya_CLEW_LIBRARY "clew" HINTS "${Maya_LIBRARY_DIR}" NO_CACHE)
+
+    if(Maya_CLEW_INCLUDE_DIR AND Maya_CLEW_LIBRARY)
+        set(Maya_CLEW_FOUND TRUE)
     endif()
 endif()
 
@@ -319,20 +314,19 @@ function(maya_add_import_target TARGET_SUFFIX)
     endif()
 endfunction()
 
-foreach(COMPONENT_PAIR ${Maya_ALL_COMPONENTS})
-    maya_pair_to_key_value(${COMPONENT_PAIR} Maya_COMPONENT_NAME Maya_LIB_NAME)
-
-    if(Maya_${Maya_COMPONENT_NAME}_FOUND)
-        maya_add_import_target(${Maya_COMPONENT_NAME}
+foreach(COMPONENT IN ZIP_LISTS Maya_COMPONENT_NAMES Maya_LIBRARY_NAMES)
+    if(Maya_${COMPONENT_0}_FOUND)
+        maya_add_import_target(${COMPONENT_0}
             INCLUDE_DIR "${Maya_INCLUDE_DIR}"
-            LIBRARY_RELEASE "${Maya_${Maya_LIB_NAME}_LIBRARY}"
+            LIBRARY_RELEASE "${Maya_${COMPONENT_1}_LIBRARY}"
         )
     endif()
 endforeach()
 
-unset(Maya_COMPONENT_NAME)
-unset(Maya_LIB_NAME)
-unset(Maya_ALL_COMPONENTS)
+unset(Maya_COMPONENT_NAMES)
+unset(Maya_INCLUDE_DIR)
+unset(Maya_LIBRARY_DIR)
+unset(Maya_LIBRARY_NAMES)
 
 if(Maya_TBB_FOUND)
     maya_add_import_target(TBB
@@ -340,7 +334,18 @@ if(Maya_TBB_FOUND)
         LIBRARY_DEBUG ${Maya_TBB_LIBRARY_DEBUG}
         LIBRARY_RELEASE ${Maya_TBB_LIBRARY_RELEASE}
     )
+
+    unset(Maya_TBB_INCLUDE_DIR)
+    unset(Maya_TBB_LIBRARY_DEBUG)
+    unset(Maya_TBB_LIBRARY_RELEASE)
 endif()
 
-unset(Maya_INCLUDE_DIR)
-unset(Maya_LIBRARY_DIR)
+if(Maya_CLEW_FOUND)
+    maya_add_import_target(CLEW
+        INCLUDE_DIR ${Maya_TBB_INCLUDE_DIR}
+        LIBRARY_RELEASE ${Maya_CLEW_LIBRARY}
+    )
+
+    unset(Maya_CLEW_INCLUDE_DIR)
+    unset(Maya_CLEW_LIBRARY)
+endif()

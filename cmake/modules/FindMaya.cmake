@@ -319,7 +319,7 @@ function(maya_add_import_target TARGET_SUFFIX)
 
     target_compile_features(${TARGET_NAME}
         INTERFACE
-            $<IF:$<VERSION_GREATER_EQUAL:${Maya_VERSION}, 2021>, cxx_std_17, cxx_std_14>
+            $<IF:$<VERSION_GREATER_EQUAL:${Maya_VERSION}, 2022>, cxx_std_17, cxx_std_14>
     )
 endfunction()
 

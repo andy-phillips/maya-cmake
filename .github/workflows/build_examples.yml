@@ -19,7 +19,7 @@ jobs:
         build-generator: ['Unix Makefiles']
         maya-version: [2019.3, 2024.2, 2025]
         include:
-            - os: ubuntu-20.04
+            - os: ubuntu-22.04
               maya-version: 2019.3
               devkit-url: https://autodesk-adn-transfer.s3-us-west-2.amazonaws.com/ADN+Extranet/M%26E/Maya/devkit+2019/Autodesk_Maya_2019_3_Update_DEVKIT_Linux.tgz
             - os: ubuntu-22.04

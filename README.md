@@ -12,6 +12,8 @@ Imported targets are a more concise way to link libraries, handle includes, and 
 
 ### Prerequisites
 
+The minimum version of CMake required by the module is 3.17.
+
 Download and extract the Maya SDK from the [Autodesk Platform Services](https://aps.autodesk.com/developer/overview/maya) website.
 
 Create the environment variable `DEVKIT_LOCATION` and set it to the `devkitBase` subdirectory.
@@ -23,6 +25,8 @@ Download or clone this repository and copy the *cmake* directory into the top le
 ### Install Using FetchContent
 
 Alternatively the module can be fetched on demand using CMake.
+
+The FetchContent_Declare FIND_PACKAGE_ARGS argument requires a CMake version greater than 3.23.
 
 ```CMake
 include(FetchContent)

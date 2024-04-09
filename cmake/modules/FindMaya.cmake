@@ -263,6 +263,10 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
+if(${CMAKE_VERSION} VERSION_GREATER 3.19)
+    set(Maya_HANDLE_VERSION_RANGE "HANDLE_VERSION_RANGE")
+endif()
+
 # NOTE: If the package was found, it will print the contents of the first
 # required variable to indicate where it was found.
 find_package_handle_standard_args(
@@ -272,8 +276,8 @@ find_package_handle_standard_args(
         Maya_SDK_ROOT_DIR
         Maya_INCLUDE_DIR
         Maya_LIBRARY_DIR
-    HANDLE_VERSION_RANGE
     HANDLE_COMPONENTS
+    ${Maya_HANDLE_VERSION_RANGE}
     REASON_FAILURE_MESSAGE "${Maya_FAILURE_MESSAGE}"
 )
 unset(Maya_FAILURE_MESSAGE)

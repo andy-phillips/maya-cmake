@@ -1,0 +1,2 @@
++ MAYAVERSION:${Maya_VERSION_MAJOR} PLATFORM:${Maya_MODULE_PLATFORM} maya-cmake ${PROJECT_VERSION} maya-cmake
+plug-ins: examples/plug-ins

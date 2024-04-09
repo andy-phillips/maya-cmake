@@ -316,6 +316,11 @@ function(maya_add_import_target TARGET_SUFFIX)
             PROPERTIES
                 IMPORTED_LOCATION_DEBUG "${TARGET_LIBRARY_DEBUG}")
     endif()
+
+    target_compile_features(${TARGET_NAME}
+        INTERFACE
+            $<IF:$<VERSION_GREATER_EQUAL:${Maya_VERSION}, 2022>, cxx_std_17, cxx_std_14>
+    )
 endfunction()
 
 foreach(COMPONENT IN ZIP_LISTS Maya_COMPONENT_NAMES Maya_LIBRARY_NAMES)

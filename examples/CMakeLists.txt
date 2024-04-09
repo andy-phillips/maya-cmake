@@ -47,58 +47,37 @@ target_link_libraries(
         Maya::Maya
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(PLATFORM_TARGET_DEFINITIONS "MAC_PLUGIN")
+    set(PLATFORM_TARGET_SUFFIX ".bundle") 
+    set(PLATFORM_MAYA_MODULE_PLATFORM "mac")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(PLATFORM_TARGET_DEFINITIONS "NT_PLUGIN")
+    set(PLATFORM_TARGET_SUFFIX ".mll") 
+    set(PLATFORM_MAYA_MODULE_PLATFORM "win64")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(PLATFORM_TARGET_SUFFIX ".so") 
+    set(PLATFORM_MAYA_MODULE_PLATFORM "linux")
+else()
+    message(FATAL_ERROR "Unsupported OS")
+endif()
+
+set_target_properties(
+    ${PLUGIN_NAME}
+    PROPERTIES
+        OUTPUT_NAME ${PLUGIN_NAME}
+        PREFIX ""
+        SUFFIX "${PLATFORM_TARGET_SUFFIX}"
+)
+
 target_compile_definitions(
     ${PLUGIN_NAME}
     PRIVATE
         "MAYA_PLUGIN_NAME=\"${PLUGIN_NAME}\""
         "MAYA_PLUGIN_VENDOR=\"Vendor Name\""
         "MAYA_PLUGIN_VERSION=\"${PROJECT_VERSION}\""
+        "${PLATFORM_TARGET_DEFINITIONS}"
 )
-
-if(APPLE)
-    target_compile_definitions(
-        ${PLUGIN_NAME}
-        PRIVATE
-            "MAC_PLUGIN"
-    )
-
-    set_target_properties(
-        ${PLUGIN_NAME}
-        PROPERTIES
-            OUTPUT_NAME ${PLUGIN_NAME}
-            PREFIX ""
-            SUFFIX ".bundle"
-    )
-
-    set(Maya_MODULE_PLATFORM "mac")
-elseif(WIN32)
-    target_compile_definitions(
-        ${PLUGIN_NAME}
-        PRIVATE
-            "NT_PLUGIN"
-    )
-
-    set_target_properties(
-        ${PLUGIN_NAME}
-        PROPERTIES
-            OUTPUT_NAME ${PLUGIN_NAME}
-            PREFIX ""
-            SUFFIX ".mll"
-    )
-
-    set(Maya_MODULE_PLATFORM "win64")
-elseif(UNIX)
-    set_target_properties(
-        ${PLUGIN_NAME}
-        PROPERTIES
-            OUTPUT_NAME ${PLUGIN_NAME}
-            PREFIX ""
-            SUFFIX ".so"
-    )
-    set(Maya_MODULE_PLATFORM "linux")
-else()
-    message(FATAL_ERROR "Unsupported OS")
-endif()
 
 configure_file("${PROJECT_NAME}.mod.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.mod")
 install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.mod" DESTINATION "${CMAKE_INSTALL_PREFIX}")

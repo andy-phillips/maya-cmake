@@ -88,9 +88,11 @@ The following cache variables may also be set:
 
 #]=============================================================================]
 
+cmake_minimum_required(VERSION 3.17)
+
 # If the environment variable DEVKIT_LOCATION has changed, clear the cache variable.
 # This allows a re-configure without the user having to clear the cache first.
-if (DEFINED ENV{DEVKIT_LOCATION})
+if(DEFINED ENV{DEVKIT_LOCATION})
     if(NOT "$ENV{DEVKIT_LOCATION}" STREQUAL "${Maya_DEVKIT_LOCATION_INTERNAL}")
         unset(Maya_SDK_ROOT_DIR CACHE)
     endif()
@@ -144,11 +146,11 @@ find_path(Maya_LIBRARY_DIR
 if(Maya_SDK_ROOT_DIR)
     unset(Maya_FAILURE_MESSAGE)
 
-    if (NOT Maya_INCLUDE_DIR AND NOT Maya_LIBRARY_DIR)
+    if(NOT Maya_INCLUDE_DIR AND NOT Maya_LIBRARY_DIR)
         set(Maya_FAILURE_MESSAGE "Missing include and lib directory in directory: ")
-    elseif (NOT Maya_INCLUDE_DIR)
+    elseif(NOT Maya_INCLUDE_DIR)
         set(Maya_FAILURE_MESSAGE "Missing include directory in directory: ")
-    elseif (NOT Maya_LIBRARY_DIR)
+    elseif(NOT Maya_LIBRARY_DIR)
         set(Maya_FAILURE_MESSAGE "Missing lib directory in directory: ")
     endif()
 
@@ -173,8 +175,8 @@ function(maya_extract_version_from_file FILE_PATH)
     else()
         set(Maya_VERSION_MINOR "${Maya_VERSION_MINOR}")
     endif()
-    set(Maya_VERSION_MINOR "${Maya_VERSION_MINOR}" PARENT_SCOPE)
 
+    set(Maya_VERSION_MINOR "${Maya_VERSION_MINOR}" PARENT_SCOPE)
     set(Maya_VERSION "${Maya_VERSION_MAJOR}.${Maya_VERSION_MINOR}" PARENT_SCOPE)
 endfunction()
 
@@ -263,7 +265,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
-if(${CMAKE_VERSION} VERSION_GREATER 3.19)
+if(CMAKE_VERSION VERSION_GREATER 3.19)
     set(Maya_HANDLE_VERSION_RANGE "HANDLE_VERSION_RANGE")
 endif()
 
@@ -306,6 +308,7 @@ function(maya_add_import_target TARGET_SUFFIX)
         PROPERTIES
             IMPORTED_LOCATION "${TARGET_LIBRARY_RELEASE}"
             INTERFACE_INCLUDE_DIRECTORIES "${TARGET_INCLUDE_DIR}"
+            INTERFACE_COMPILE_FEATURES $<IF:$<VERSION_GREATER_EQUAL:${Maya_VERSION},2022>,cxx_std_17,cxx_std_14>
     )
 
     if(TARGET_LIBRARY_DEBUG)
@@ -316,11 +319,6 @@ function(maya_add_import_target TARGET_SUFFIX)
             PROPERTIES
                 IMPORTED_LOCATION_DEBUG "${TARGET_LIBRARY_DEBUG}")
     endif()
-
-    target_compile_features(${TARGET_NAME}
-        INTERFACE
-            $<IF:$<VERSION_GREATER_EQUAL:${Maya_VERSION}, 2022>, cxx_std_17, cxx_std_14>
-    )
 endfunction()
 
 foreach(COMPONENT IN ZIP_LISTS Maya_COMPONENT_NAMES Maya_LIBRARY_NAMES)

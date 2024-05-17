@@ -116,3 +116,7 @@ The following cache variables may also be set:
 `Maya_SDK_ROOT_DIR` - Path to the Maya SDK if found (defined if not set).
 
 `Maya_EXECUTABLE` - Path to the Maya executable if found (defined if not set).
+
+`Maya_PYTHON_EXECUTABLE` - Path to the mayapy executable (defined if not set).
+
+`Maya_BATCH_EXECUTABLE` - Path to the mayabatch executable on Windows (defined if not set).

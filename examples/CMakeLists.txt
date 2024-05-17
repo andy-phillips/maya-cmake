@@ -47,19 +47,19 @@ target_link_libraries(
         Maya::Maya
 )
 
-if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    set(PLATFORM_TARGET_DEFINITIONS "MAC_PLUGIN")
-    set(PLATFORM_TARGET_SUFFIX ".bundle") 
-    set(PLATFORM_MAYA_MODULE_PLATFORM "mac")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(PLATFORM_TARGET_DEFINITIONS "NT_PLUGIN")
     set(PLATFORM_TARGET_SUFFIX ".mll") 
     set(PLATFORM_MAYA_MODULE_PLATFORM "win64")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(PLATFORM_TARGET_DEFINITIONS "MAC_PLUGIN")
+    set(PLATFORM_TARGET_SUFFIX ".bundle") 
+    set(PLATFORM_MAYA_MODULE_PLATFORM "mac")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(PLATFORM_TARGET_SUFFIX ".so") 
     set(PLATFORM_MAYA_MODULE_PLATFORM "linux")
 else()
-    message(FATAL_ERROR "Unsupported OS")
+    message(FATAL_ERROR "Unsupported operating system")
 endif()
 
 set_target_properties(
@@ -84,7 +84,7 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.mod" DESTINATION "${CMAKE_I
 
 install(TARGETS "${PLUGIN_NAME}" DESTINATION "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/${PLUGIN_NAME}/plug-ins")
 
-if(WIN32)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     install(
         FILES $<TARGET_PDB_FILE:${PLUGIN_NAME}>
         DESTINATION "${CMAKE_INSTALL_PREFIX}/${PROJECT}/${PLUGIN_NAME}/plug-ins"

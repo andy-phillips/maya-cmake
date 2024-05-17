@@ -86,6 +86,12 @@ The following cache variables may also be set:
 ``Maya_EXECUTABLE``
     Path to the Maya executable (defined if not set).
 
+``Maya_PYTHON_EXECUTABLE``
+    Path to the mayapy executable (defined if not set).
+
+``Maya_BATCH_EXECUTABLE``
+    Path to the mayabatch executable on Windows (defined if not set).
+
 #]=============================================================================]
 
 cmake_minimum_required(VERSION 3.17)
@@ -228,7 +234,7 @@ if((NOT Maya_FIND_COMPONENTS) OR (Maya_FIND_COMPONENTS AND "CLEW" IN_LIST Maya_F
     endif()
 endif()
 
-function(maya_find_executable)
+function(maya_find_executable EXECUTABLE_NAME VARIABLE_NAME)
     if(CMAKE_SYSTEM_NAME STREQUAL Windows)
         set(DEFAULT_INSTALL_DIR "C:\\Program Files\\Autodesk")
     elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
@@ -238,7 +244,7 @@ function(maya_find_executable)
     endif()
 
     find_program(Maya_EXECUTABLE
-        "maya"
+        "${EXECUTABLE_NAME}"
         PATHS
             "$ENV{MAYA_LOCATION}"
             "${DEFAULT_INSTALL_DIR}"
@@ -246,13 +252,17 @@ function(maya_find_executable)
             "bin"
             "maya${Maya_VERSION_MAJOR}/Maya.app/Contents/bin"
         DOC
-            "Absolute path to Maya executable."
+            "Absolute path to ${EXECUTABLE_NAME} executable."
     )
 
-    set(Maya_EXECUTABLE "${Maya_EXECUTABLE}" PARENT_SCOPE)
+    set(${VARIABLE_NAME} "${Maya_EXECUTABLE}" PARENT_SCOPE)
 endfunction()
 
-maya_find_executable()
+maya_find_executable("maya" "Maya_EXECUTABLE")
+maya_find_executable("mayapy" "Maya_PYTHON_EXECUTABLE")
+if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+    maya_find_executable("mayabatch" "Maya_BATCH_EXECUTABLE")
+endif()
 
 # Cache the DEVKIT_LOCATION environment variable to monitor for changes.
 if(DEFINED ENV{DEVKIT_LOCATION})
@@ -287,7 +297,12 @@ unset(Maya_FAILURE_MESSAGE)
 mark_as_advanced(
     Maya_SDK_ROOT_DIR
     Maya_EXECUTABLE
+    Maya_PYTHON_EXECUTABLE
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+    mark_as_advanced(Maya_BATCH_EXECUTABLE)
+endif()
 
 function(maya_add_import_target TARGET_SUFFIX)
     cmake_parse_arguments(

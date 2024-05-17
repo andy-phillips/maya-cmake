@@ -227,12 +227,12 @@ if((NOT Maya_FIND_COMPONENTS) OR (Maya_FIND_COMPONENTS AND "CLEW" IN_LIST Maya_F
 endif()
 
 function(maya_find_executable)
-    if(APPLE)
-        set(DEFAULT_INSTALL_DIR "/Applications/Autodesk")
-    elseif(UNIX)
-        set(DEFAULT_INSTALL_DIR "/usr/autodesk")
-    elseif(WIN32)
+    if(CMAKE_SYSTEM_NAME STREQUAL Windows)
         set(DEFAULT_INSTALL_DIR "C:\\Program Files\\Autodesk")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+        set(DEFAULT_INSTALL_DIR "/Applications/Autodesk")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
+        set(DEFAULT_INSTALL_DIR "/usr/autodesk")
     endif()
 
     find_program(Maya_EXECUTABLE

@@ -88,6 +88,8 @@ The following cache variables may also be set:
 
 #]=============================================================================]
 
+cmake_minimum_required(VERSION 3.17)
+
 # If the environment variable DEVKIT_LOCATION has changed, clear the cache variable.
 # This allows a re-configure without the user having to clear the cache first.
 if(DEFINED ENV{DEVKIT_LOCATION})

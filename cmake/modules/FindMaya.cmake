@@ -243,19 +243,18 @@ function(maya_find_executable EXECUTABLE_NAME VARIABLE_NAME)
         set(DEFAULT_INSTALL_DIR "/usr/autodesk")
     endif()
 
-    find_program(Maya_EXECUTABLE
+    find_program("${VARIABLE_NAME}"
         "${EXECUTABLE_NAME}"
         PATHS
             "$ENV{MAYA_LOCATION}"
             "${DEFAULT_INSTALL_DIR}"
         PATH_SUFFIXES
             "bin"
+            "maya${Maya_VERSION_MAJOR}/bin"
             "maya${Maya_VERSION_MAJOR}/Maya.app/Contents/bin"
         DOC
             "Absolute path to ${EXECUTABLE_NAME} executable."
     )
-
-    set(${VARIABLE_NAME} "${Maya_EXECUTABLE}" PARENT_SCOPE)
 endfunction()
 
 maya_find_executable("maya" "Maya_EXECUTABLE")

@@ -6,7 +6,7 @@ A modern [CMake](https://cmake.org) module for the Autodesk® Maya® SDK (also k
 
 Whilst the Maya SDK includes a CMake module, it does not provide imported targets (also known as package components), but instead only sets a few variables such as the library and include directories.
 
-Imported targets are a more concise way to link libraries, handle includes, and target properties.
+Imported targets are a more concise way to link libraries, handle includes, and set target properties.
 
 ## Installation
 

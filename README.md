@@ -1,4 +1,7 @@
 # maya-cmake
+
+![Build Status Badge](https://github.com/andy-phillips/maya-cmake/actions/workflows/build_examples.yml/badge.svg)
+
 A modern [CMake](https://cmake.org) module for the Autodesk® Maya® SDK (also known as the Maya "devkit").
 
 ## Motivation
